@@ -47,8 +47,8 @@ Câu trả lời của product owner cho những chỗ class brief chưa nói t�
 
 **Trả lời.**
 - **Admin** tạo lớp và gán TA vào lớp. Một lớp có nhiều TA được, một TA ở nhiều lớp được.
-- **TA** tạo lab trong lớp mình phụ trách; thêm hoặc xoá sinh viên của lớp; tạo và đổi mã mời của lớp.
-- **Sinh viên** vào lớp bằng mã mời, hoặc được TA thêm vào. Một sinh viên học nhiều lớp được.
+- **TA** tạo lab trong lớp mình phụ trách.
+- **Sinh viên** vào lớp bằng mã mời hoặc do TA thêm vào; mỗi nhóm làm **ít nhất một** trong hai cách. Một sinh viên học nhiều lớp được.
 - **Ai thấy gì:** TA chỉ thấy lab, bài nộp và hàng chờ của lớp mình. Sinh viên chỉ thấy lab của lớp mình và **bài nộp của chính mình**.
 
 **Lý do.** Brief đã nêu "TAs belong to classes" và "each lab belongs to a class". Mục này ghi rõ ai được làm gì, để mọi nhóm viết luật phân quyền giống nhau và red-team ở PA#4 có cùng một chuẩn để thử.
@@ -67,7 +67,7 @@ Câu trả lời của product owner cho những chỗ class brief chưa nói t�
 - Trước hạn, sinh viên **nộp bao nhiêu lần cũng được**. Mỗi lần nộp được chấm ngay; sinh viên thấy verdict tổng và verdict từng test, nhưng **không thấy input, output của test**.
 - **Bài được tính là bài nộp cuối cùng trước hạn, dù kết quả của nó là gì.**
   Ví dụ: nộp lúc 20:00 được `AC`, nộp lại lúc 21:00 bị `WA` → bài 21:00 được tính.
-- Chỉ bài được tính mới được soát ràng buộc để vào hàng chờ của TA.
+- Chỉ bài được tính mới được soát ràng buộc để vào hàng chờ của TA. **Trước hạn**, hàng chờ hiện bài nộp mới nhất của mỗi sinh viên (tạm tính); **khi hết hạn** thì chốt.
 
 *Ghi chú cho các nhóm:* hệ thống được phép soát sớm từng bài `AC` để đỡ dồn việc sau hạn, nhưng hàng chờ chỉ hiện kết quả của bài được tính.
 
@@ -95,7 +95,7 @@ Câu trả lời của product owner cho những chỗ class brief chưa nói t�
 **Trả lời.**
 - Bài **Accepted**: điểm gốc 10, trừ các khoản trừ (FAQ-11).
 - Bài **không Accepted**: mặc định **0 điểm** và **không soát ràng buộc**.
-- TA được **nhập điểm tay** từ 0 đến 10 cho bài không Accepted, kèm một dòng lý do. Mỗi lần nhập được ghi nhật ký.
+- Hệ thống **có thể** cho TA **nhập điểm tay** từ 0 đến 10 cho bài không Accepted, kèm một dòng lý do và ghi nhật ký. Đây là tính năng tuỳ chọn; nhóm không làm thì bài không Accepted luôn là 0 điểm.
 - Hệ thống không tự chấm điểm từng phần (ví dụ theo số test qua).
 
 **Lý do.**
@@ -109,20 +109,22 @@ Câu trả lời của product owner cho những chỗ class brief chưa nói t�
 *2026-10-25. Brief: mục 5. Yêu cầu tối thiểu của sandbox do thầy quy định; mục này chỉ đặt giá trị mặc định.*
 **Từ khoá:** time limit, memory limit, giới hạn, g++, C++17, output limit, kích thước code, sandbox.
 
-**Trả lời.** TA chỉnh được một số giới hạn cho từng lab, trong khoảng cho phép:
+**Trả lời.** Đây là giá trị **mặc định** cho mỗi lab. Các yêu cầu bắt buộc ở brief mục 5 (không mạng, không chạy bằng root, không mount thư mục host, không truy cập Docker socket, không có secret) vẫn áp dụng đầy đủ. TA chỉnh được một số giới hạn trong khoảng cho phép:
 
 | Giới hạn | Mặc định | TA chỉnh được | Vượt thì |
 |---|---|---|---|
 | Lệnh biên dịch | `g++ -std=c++17 -O2` | Không | — |
-| Thời gian biên dịch | 10 giây | Không | `CE` |
+| Thời gian biên dịch | 10 giây, nếu sandbox cho đặt riêng | Không | `CE` |
 | Kích thước code nộp | 64 KB | Không | Bị từ chối khi nộp, không tính là một lần nộp |
 | CPU time mỗi test | 1 giây | 1–5 giây | `TLE` |
 | Wall time mỗi test | 3 lần CPU time | Tự theo CPU time | `TLE` |
-| Bộ nhớ | 256 MB | 64–512 MB | `MLE` |
-| Số tiến trình, tính cả luồng | 16 | Không | `RE` |
+| Bộ nhớ | 256 MB | 64–512 MB | `MLE`, hoặc `RE` nếu sandbox không phân biệt được (ví dụ Judge0) |
+| Số tiến trình, tính cả luồng | 16 | Không | Lệnh tạo thêm tiến trình bị từ chối; kết quả tuỳ chương trình xử lý (thường `RE` hoặc `WA`) |
 | Output mỗi test | 1 MB | Không | `RE` |
 
 **Lý do.** Cùng lệnh biên dịch với bộ eval của thầy. Giá trị chung giúp các nhóm so sánh được load test và có cùng chuẩn khi red-team ở PA#4.
+
+*Ghi chú cho nhóm dùng Judge0:* Judge0 không có verdict `MLE`, và mặc định chỉ cho bộ nhớ tối đa khoảng 256 MB; muốn TA đặt tới 512 MB thì tăng `MAX_MEMORY_LIMIT` trong cấu hình Judge0.
 
 ---
 
@@ -157,7 +159,7 @@ Câu trả lời của product owner cho những chỗ class brief chưa nói t�
 | **Từ lúc mở nhận bài đến trước khi công bố điểm** | **Không được thêm** ràng buộc mới, **không được tăng** mức trừ. Chỉ được: sửa câu chữ cho rõ hơn mà **không đổi ý nghĩa**, giảm mức trừ, hoặc xoá hẳn một ràng buộc. Mỗi lần sửa, mọi đề xuất cũ của ràng buộc đó bị huỷ và hệ thống soát lại. Đề hiện ngày sửa gần nhất. |
 | **Sau khi công bố điểm** | Không sửa ràng buộc nữa. Muốn đổi điểm thì đi qua khiếu nại hoặc chỉnh điểm từng bài (FAQ-12). |
 
-Sửa câu chữ mà **đổi ý nghĩa** (ví dụ từ "không dùng `std::sort`" thành "không dùng bất kỳ hàm nào trong `<algorithm>`") được tính là thêm ràng buộc mới, nên không được phép.
+Sửa câu chữ mà **đổi ý nghĩa** (ví dụ từ "không dùng `std::sort`" thành "không dùng bất kỳ hàm nào trong `<algorithm>`") được tính là thêm ràng buộc mới, nên không được phép. Hệ thống không tự kiểm được câu chữ có đổi nghĩa hay không: đây là quy tắc cho TA. Hệ thống chỉ chặn việc thêm ràng buộc và tăng mức trừ, đồng thời lưu lịch sử mọi bản sửa để sinh viên đối chiếu khi khiếu nại.
 
 **Lý do.**
 - Sinh viên làm bài theo ràng buộc họ đọc được lúc nộp. Thêm luật hoặc tăng mức trừ sau đó là trừ điểm vì một quy định họ không được biết.
@@ -262,7 +264,7 @@ Ví dụ: lab có C1 (trừ 3) và C2 (trừ 4). Bài gọi `std::sort` ở 2 ch
 **Trả lời.**
 - Sinh viên khiếu nại **từng khoản trừ** của bài mình, **sau khi công bố**, trong **7 ngày** kể từ lúc công bố. Một bài có nhiều khoản trừ thì khiếu nại riêng từng khoản.
 - Khiếu nại phải có ít nhất một câu giải thích vì sao mình không vi phạm.
-- Trạng thái: **đang chờ** → **chấp nhận** (khoản trừ bị gỡ, điểm cập nhật) hoặc **bác** (TA ghi lý do).
+- Trạng thái: **đang chờ** → **chấp nhận** (khoản trừ bị gỡ, điểm cập nhật) hoặc **bác**. Cả hai trường hợp TA đều phải ghi lý do.
 - Không khiếu nại qua hệ thống đối với kết quả chấm test hay điểm TA nhập tay (FAQ-04). Những việc đó sinh viên trao đổi trực tiếp với TA.
 
 **Lý do.** Brief định nghĩa khiếu nại là khiếu nại một khoản trừ. Có hạn thì TA chốt được điểm lab.
